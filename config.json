@@ -1,13 +1,13 @@
 {
-  "nombre_negocio": "(peluqueria carmen",
+  "nombre_negocio": "peluqueria carmen",
   "mensaje_bienvenida": "cortes, tintes y mechas y urgencias. Horario: Lunes a Sabado de 9:00 a 20:00. 1-Precios 2-Cita 3-Urgencia",
   "servicios": [
-    { "nombre": "Limpieza dental", "precio": "40€", "duracion_min": 30 },
-    { "nombre": "Blanqueamiento", "precio": "120€", "duracion_min": 60 },
-    { "nombre": "Revision", "precio": "GRATIS", "duracion_min": 15 },
-    { "nombre": "Urgencia", "precio": "50€", "duracion_min": 30 }
+    { "nombre": "corte mujer", "precio": "40€", "duracion_min": 30 },
+    { "nombre": "Tinte completo", "precio": "120€", "duracion_min": 60 },
+    { "nombre": "Mechas", "precio": "GRATIS", "duracion_min": 15 },
+    { "nombre": "peinado", "precio": "50€", "duracion_min": 30 }
   ],
-  "link_google_maps": "https://maps.google.com/?q=Clinica+Dental+Sonrisa",
+  "link_google_maps": "https://maps.google.com/?q=Peluqueria+Peinado+Mechas",
   "link_resenas_google": "https://g.page/r/EJEMPLO/review",
   "telefono_humano": "+34631441910",
   "duracion_cita_min": 30,
