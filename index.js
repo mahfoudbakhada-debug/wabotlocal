@@ -128,7 +128,10 @@ app.use((err, req, res, next) => {
   next();
 });
 
-// =========================================================
+// --- Ruta para UptimeRobot - que no se duerma ---
+app.get('/', (req, res) => {
+  res.status(200).send('WabotLocal activo 24/7 🟢');
+}); 
 app.listen(PORT, () => {
   console.log(`🤖 WabotLocal escuchando en el puerto ${PORT}`);
   console.log(`   Webhook WhatsApp: POST /webhook`);
