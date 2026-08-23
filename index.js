@@ -12,9 +12,13 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const fs = require("fs");
 const path = require("path");
+
+// --- CANDADO DE PAGO ---
+const configLock = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json"), "utf-8"));
+if (configLock.activo === false) { console.log("⛔ CLIENTA NO PAGÓ - BOT APAGADO"); process.exit(0); }
+
 const multer = require("multer");
 const basicAuth = require("basic-auth");
-
 const { manejarWebhook } = require("./twilio");
 
 const app = express();
