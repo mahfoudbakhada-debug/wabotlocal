@@ -3,50 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Demo Peluquería | WabotLocal PRO</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<title>Demo Peluquería | WabotLocal</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Inter',sans-serif;background:#0f0f0f;color:#fff}
-  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;position:relative;background:radial-gradient(circle at 50% 0%, #2a2a2a 0%, #0f0f0f 60%);}
-  .badge{background:#25D366;color:#000;font-weight:800;padding:6px 14px;border-radius:100px;font-size:12px;margin-bottom:20px}
-  h1{font-family:'Playfair Display',serif;font-size:52px;text-align:center;line-height:0.9;max-width:600px}
-  h1 span{color:#25D366}
-  .sub{opacity:0.6;text-align:center;margin-top:16px;max-width:420px;font-size:16px;line-height:1.5}
-  .phone{width:320px;background:#111;border:8px solid #222;border-radius:44px;box-shadow:0 30px 80px rgba(0,0,0,0.8);overflow:hidden;margin-top:40px}
-  .phone-header{background:#1f1f1f;padding:18px 20px;display:flex;align-items:center;gap:12px}
-  .avatar{width:38px;height:38px;background:#25D366;border-radius:100%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#000}
-  .chat{padding:20px;background:#0b141a;min-height:380px;display:flex;flex-direction:column;gap:12px}
-  .bubble{max-width:80%;padding:12px 14px;border-radius:18px;font-size:14px}
-  .bubble.bot{background:#202c33;border-top-left-radius:4px}
-  .bubble.user{background:#005c4b;align-self:flex-end;border-top-right-radius:4px}
-  .cta{margin-top:36px;background:#25D366;color:#000;padding:18px 32px;border-radius:100px;font-weight:800;text-decoration:none;font-size:16px;display:flex;align-items:center;gap:10px}
-  .features{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:700px;margin:60px auto 0;padding:0 20px}
-  .feat{background:#1a1a1a;border:1px solid #252525;border-radius:20px;padding:20px}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,sans-serif;background:#0f0f0f;color:#fff}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;background:radial-gradient(circle at 50% 0%, #2a2a2a 0%, #0f0f0f 60%)}
+.badge{background:#25D366;color:#000;font-weight:800;padding:6px 14px;border-radius:100px;font-size:12px;margin-bottom:20px}
+h1{font-family:serif;font-size:52px;text-align:center;line-height:0.9;max-width:600px}h1 span{color:#25D366}
+.sub{opacity:.6;text-align:center;margin-top:16px;max-width:420px}
+.phone{width:320px;background:#111;border:8px solid #222;border-radius:44px;overflow:hidden;margin-top:40px}
+.phone-header{background:#1f1f1f;padding:18px 20px;display:flex;gap:12px;align-items:center}
+.avatar{width:38px;height:38px;background:#25D366;border-radius:100%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#000}
+.chat{padding:20px;background:#0b141a;min-height:380px;display:flex;flex-direction:column;gap:12px}
+.bubble{max-width:80%;padding:12px 14px;border-radius:18px;font-size:14px}
+.bot{background:#202c33}.user{background:#005c4b;align-self:flex-end}
+.cta{margin-top:36px;background:#25D366;color:#000;padding:18px 32px;border-radius:100px;font-weight:800;text-decoration:none}
 </style>
 </head>
 <body>
 <div class="hero">
-  <div class="badge">DEMO EN VIVO • WHATSAPP 24H</div>
-  <h1>Tu peluquería <span>reserva sola</span> por WhatsApp</h1>
-  <p class="sub">Prueba abajo como reservaría una clienta real. Este es el asistente que instalo en peluquerías de Barcelona.</p>
-  <div class="phone">
-    <div class="phone-header"><div class="avatar">P</div><div><div style="font-weight:700">Peluquería María</div><div style="font-size:12px;color:#25D366">● En línea</div></div></div>
-    <div class="chat">
-      <div class="bubble bot">¡Hola! Soy el asistente de Peluquería María 💇‍♀️<br><br>¿En qué te puedo ayudar?<br>1. Ver servicios<br>2. Reservar cita</div>
-      <div class="bubble user">2</div>
-      <div class="bubble bot">¡Perfecto! ¿Qué servicio?<br><br>✂️ Corte - 18€<br>🎨 Color - 45€<br>💅 Uñas - 25€</div>
-      <div class="bubble user">Corte mañana 17h</div>
-      <div class="bubble bot">¡Hecho! ✅<br><br>📅 Mañana 17:00 - Corte<br>Te espero en C/ Balmes 123</div>
-    </div>
-  </div>
-  <a class="cta" href="https://wa.me/34600000000" target="_blank">💬 PROBAR EN MI WHATSAPP</a>
-  <div class="features">
-    <div class="feat"><b>📅 Reserva 24h</b><span>Nunca pierdes una clienta</span></div>
-    <div class="feat"><b>🤖 Sin comisiones</b><span>No pagas a Fresha ni Booksy</span></div>
-    <div class="feat"><b>⏰ Recuerda citas</b><span>Reduce no-shows un 90%</span></div>
-    <div class="feat"><b>⚡ Instalado en 1 día</b><span>49€ + 29€/mes</span></div>
-  </div>
+<div class="badge">DEMO EN VIVO • WHATSAPP 24H</div>
+<h1>Tu peluquería <span>reserva sola</span> por WhatsApp</h1>
+<p class="sub">Prueba como reservaría una clienta real</p>
+<div class="phone">
+<div class="phone-header"><div class="avatar">P</div><div><b>Peluquería María</b><div style="font-size:12px;color:#25D366">● En línea</div></div></div>
+<div class="chat">
+<div class="bubble bot">¡Hola! Soy el asistente de Peluquería María 💇‍♀️<br>¿Reservar cita?</div>
+<div class="bubble user">Sí, corte mañana 17h</div>
+<div class="bubble bot">¡Hecho! ✅ Mañana 17:00 - Corte</div>
+</div>
+</div>
+<a class="cta" href="https://wa.me/34631441910?text=Hola%20vi%20la%20demo%20de%20la%20peluqueria%20y%20quiero%20info" target="_blank">💬 PROBAR EN MI WHATSAPP</a>
 </div>
 </body>
 </html>
