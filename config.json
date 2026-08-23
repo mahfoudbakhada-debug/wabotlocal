@@ -1,6 +1,6 @@
 {
-  "nombre_negocio": "Clinica Dental Sonrisa",
-  "mensaje_bienvenida": "Limpiezas, blanqueamiento y urgencias. Horario: Lunes a Sabado de 9:00 a 20:00. 1-Precios 2-Cita 3-Urgencia",
+  "nombre_negocio": "(peluqueria carmen",
+  "mensaje_bienvenida": "cortes, tintes y mechas y urgencias. Horario: Lunes a Sabado de 9:00 a 20:00. 1-Precios 2-Cita 3-Urgencia",
   "servicios": [
     { "nombre": "Limpieza dental", "precio": "40€", "duracion_min": 30 },
     { "nombre": "Blanqueamiento", "precio": "120€", "duracion_min": 60 },
