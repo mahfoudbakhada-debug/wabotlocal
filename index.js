@@ -27,7 +27,6 @@ const PORT = process.env.PORT || 3000;
 // --- Middlewares generales ---
 app.use(bodyParser.urlencoded({ extended: false })); // Twilio envia application/x-www-form-urlencoded
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, "public"))); // sirve /public (carta.pdf, admin.html, etc)
 
 // =========================================================
 // WEBHOOK DE WHATSAPP (Twilio)
@@ -131,11 +130,13 @@ app.use((err, req, res, next) => {
   }
   next();
 });
+// --- PUBLIC al final para que admin.html pida contraseña ---
+app.use(express.static(path.join(__dirname, "public")));
 
 // --- Ruta para UptimeRobot - que no se duerma ---
-app.get('/', (req, res) => {
-  res.status(200).send('WabotLocal activo 24/7 🟢');
-}); 
+app.get("/ping", (req, res) => {
+  res.status(200).send('WabotLocal activo 24/7');
+});
 app.listen(PORT, () => {
   console.log(`🤖 WabotLocal escuchando en el puerto ${PORT}`);
   console.log(`   Webhook WhatsApp: POST /webhook`);
