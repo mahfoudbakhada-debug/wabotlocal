@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo_Peluqueria - Bot WhatsApp</title>
+<style>
+body{font-family:sans-serif;background:#f0f2f5;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+.phone{width:350px;height:600px;background:white;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,0.2);display:flex;flex-direction:column;overflow:hidden;border:8px solid #111}
+.header{background:#075e54;color:white;padding:15px;font-weight:bold;display:flex;align-items:center}
+.chat{flex:1;padding:15px;overflow-y:auto;background:#e5ddd5}
+.msg{background:white;padding:10px 15px;border-radius:8px;margin:8px 0;max-width:80%;box-shadow:0 1px 1px rgba(0,0,0,0.1)}
+.msg.bot{background:white}
+.msg.user{background:#dcf8c6;margin-left:auto}
+.input-area{display:flex;padding:10px;background:#f0f0f0}
+input{flex:1;padding:10px;border:none;border-radius:20px;outline:none}
+button{background:#25d366;color:white;border:none;padding:10px 15px;border-radius:50%;margin-left:10px;cursor:pointer}
+.badge{text-align:center;padding:10px;font-size:12px;color:#888}
+</style>
+</head>
+<body>
+<div>
+<div class="badge">✅ WabotLocal funcionando - DEMO EN VIVO</div>
+<div class="phone">
+<div class="header">💈 Demo_Peluqueria</div>
+<div class="chat" id="chat">
+<div class="msg bot">¡Hola! Bienvenido a nuestra peluquería. Horario: Lunes a Sábado 10:00 a 20:00.<br><br>Escribe:<br>1 - Corte<br>2 - Tinte<br>3 - Precios<br>4 - Ubicación<br>5 - Hablar con persona</div>
+</div>
+<div class="input-area">
+<input id="input" placeholder="Escribe un número..." onkeypress="if(event.key==='Enter')send()">
+<button onclick="send()">➤</button>
+</div>
+</div>
+<div class="badge">Así lo verán tus clientes en WhatsApp</div>
+</div>
+<script>
+function send(){
+let i=document.getElementById('input'); let t=i.value.trim(); if(!t)return;
+let c=document.getElementById('chat'); c.innerHTML+=`<div class="msg user">${t}</div>`; i.value='';
+setTimeout(()=>{
+let r="No te entiendo. Escribe 1,2,3,4 o 5";
+if(t=="1")r="✂️ Corte de pelo: 15€ - 30min. ¿Quieres reservar? Escribe 5 para hablar con nosotros.";
+if(t=="2")r="🎨 Tinte completo: desde 35€. Incluye lavado y peinado.";
+if(t=="3")r="💰 Lista de precios: Corte 15€, Barba 10€, Corte+Barba 20€, Tinte 35€";
+if(t=="4")r="📍 Estamos en Barcelona. Te dejo el Maps: https://maps.google.com";
+if(t=="5")r="👩‍💼 Te paso con una persona ahora mismo. Un segundo... (Aquí le llegaría el aviso a la peluquera)";
+c.innerHTML+=`<div class="msg bot">${r}</div>`; c.scrollTop=c.scrollHeight;
+},600);
+c.scrollTop=c.scrollHeight;
+}
+</script>
+</div>
+</body>
+</html>
