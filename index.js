@@ -32,7 +32,7 @@ app.post("/webhook", manejarWebhook);
 
 // Ruta de salud, util para comprobar que el deploy funciona
 app.get("/", (req, res) => {
-  res.send("WabotLocal esta funcionando ✅");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // =========================================================
