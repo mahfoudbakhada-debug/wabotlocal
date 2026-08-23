@@ -1,4 +1,5 @@
 {
+  "activo": true,
   "nombre_negocio": "peluqueria maria",
   "mensaje_bienvenida": "cortes, tintes y mechas y urgencias. Horario: Lunes a Sabado de 9:00 a 20:00. 1-Precios 2-Cita 3-Urgencia",
   "servicios": [
