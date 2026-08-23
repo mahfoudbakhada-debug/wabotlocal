@@ -1,17 +1,7 @@
 {
   "activo": true,
-  "nombre_negocio": "peluqueria maria",
-  "mensaje_bienvenida": "cortes, tintes y mechas y urgencias. Horario: Lunes a Sabado de 9:00 a 20:00. 1-Precios 2-Cita 3-Urgencia",
-  "servicios": [
-    { "nombre": "corte mujer", "precio": "15€", "duracion_min": 30 },
-    { "nombre": "Tinte completo", "precio": "40€", "duracion_min": 60 },
-    { "nombre": "Mechas", "precio": "GRATIS", "duracion_min": 15 },
-    { "nombre": "peinado", "precio": "20€", "duracion_min": 30 }
-  ],
-  "link_google_maps": "https://maps.google.com/?q=Peluqueria+Peinado+Mechas",
-  "link_resenas_google": "https://g.page/r/EJEMPLO/review",
-  "telefono_humano": "+34631441910",
-  "duracion_cita_min": 30,
-  "horario_apertura": "09:00",
-  "horario_cierre": "20:00"
+  "nombre_negocio": "Peluquería María",
+  "mensaje_bienvenida": "Bienvenida a Peluquería María. 1-Precios 2-Cita 3-Ubicación",
+  "direccion": "https://maps.google.com/?q=Peluqueria+Maria",
+  "telefono": "631441910"
 }
