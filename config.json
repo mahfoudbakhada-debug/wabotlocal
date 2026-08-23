@@ -1,0 +1,16 @@
+{
+  "nombre_negocio": "Peluqueria Estilo",
+  "mensaje_bienvenida": "Cortes, color y tratamientos capilares. Horario: Lunes a Sabado de 9:00 a 20:00.",
+  "servicios": [
+    { "nombre": "Corte de pelo", "precio": "15€", "duracion_min": 30 },
+    { "nombre": "Corte + Barba", "precio": "22€", "duracion_min": 45 },
+    { "nombre": "Tinte", "precio": "35€", "duracion_min": 60 },
+    { "nombre": "Peinado especial", "precio": "25€", "duracion_min": 45 }
+  ],
+  "link_google_maps": "https://maps.google.com/?q=Peluqueria+Estilo",
+  "link_resenas_google": "https://g.page/r/EJEMPLO/review",
+  "telefono_humano": "+34600000000",
+  "duracion_cita_min": 30,
+  "horario_apertura": "09:00",
+  "horario_cierre": "20:00"
+}

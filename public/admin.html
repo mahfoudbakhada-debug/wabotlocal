@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WabotLocal - Panel de Administracion</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 0;
+    color: #222;
+  }
+  header {
+    background: #25D366;
+    color: white;
+    padding: 20px 30px;
+  }
+  header h1 { margin: 0; font-size: 22px; }
+  header p { margin: 4px 0 0; opacity: 0.9; font-size: 14px; }
+  .container {
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 0 20px;
+  }
+  .card {
+    background: white;
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .card h2 {
+    margin-top: 0;
+    font-size: 17px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
+  label {
+    display: block;
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+  }
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  textarea { min-height: 70px; resize: vertical; }
+  button {
+    margin-top: 18px;
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: #1ea952; }
+  .estado {
+    margin-top: 12px;
+    font-size: 13px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    display: none;
+  }
+  .estado.ok { background: #e6f7ec; color: #1a7a3d; display: block; }
+  .estado.error { background: #fdeaea; color: #b3261e; display: block; }
+  input[type="file"] { margin-top: 8px; }
+  .nota { font-size: 12px; color: #888; margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🤖 WabotLocal - Panel de Administracion</h1>
+  <p>Edita la configuracion de tu asistente de WhatsApp</p>
+</header>
+
+<div class="container">
+
+  <!-- Formulario de configuracion general -->
+  <div class="card">
+    <h2>Configuracion del negocio</h2>
+    <form id="formConfig">
+      <label for="nombre_negocio">Nombre del negocio</label>
+      <input type="text" id="nombre_negocio" name="nombre_negocio" required />
+
+      <label for="mensaje_bienvenida">Mensaje de bienvenida / descripcion</label>
+      <textarea id="mensaje_bienvenida" name="mensaje_bienvenida"></textarea>
+
+      <label for="link_google_maps">Link de Google Maps</label>
+      <input type="text" id="link_google_maps" name="link_google_maps" placeholder="https://maps.google.com/..." />
+
+      <label for="link_resenas_google">Link para dejar resena en Google</label>
+      <input type="text" id="link_resenas_google" name="link_resenas_google" placeholder="https://g.page/r/..." />
+
+      <label for="telefono_humano">Telefono para hablar con una persona</label>
+      <input type="text" id="telefono_humano" name="telefono_humano" placeholder="+34600000000" />
+
+      <button type="submit">Guardar configuracion</button>
+      <div id="estadoConfig" class="estado"></div>
+    </form>
+  </div>
+
+  <!-- Formulario de subida de carta.pdf -->
+  <div class="card">
+    <h2>Carta / catalogo (PDF)</h2>
+    <p class="nota">Este PDF se envia automaticamente a los clientes cuando escriben "1" (Ver servicios/precios).</p>
+    <form id="formCarta" enctype="multipart/form-data">
+      <label for="carta">Subir nuevo archivo PDF</label>
+      <input type="file" id="carta" name="carta" accept="application/pdf" required />
+      <button type="submit">Subir PDF</button>
+      <div id="estadoCarta" class="estado"></div>
+    </form>
+  </div>
+
+</div>
+
+<script>
+  // Cargar la configuracion actual al abrir la pagina
+  async function cargarConfig() {
+    const resp = await fetch("/admin/config");
+    if (!resp.ok) return;
+    const config = await resp.json();
+    document.getElementById("nombre_negocio").value = config.nombre_negocio || "";
+    document.getElementById("mensaje_bienvenida").value = config.mensaje_bienvenida || "";
+    document.getElementById("link_google_maps").value = config.link_google_maps || "";
+    document.getElementById("link_resenas_google").value = config.link_resenas_google || "";
+    document.getElementById("telefono_humano").value = config.telefono_humano || "";
+  }
+  cargarConfig();
+
+  // Guardar configuracion
+  document.getElementById("formConfig").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const datos = Object.fromEntries(new FormData(e.target));
+    const estadoDiv = document.getElementById("estadoConfig");
+
+    try {
+      const resp = await fetch("/admin/config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(datos),
+      });
+      const resultado = await resp.json();
+      estadoDiv.className = resultado.ok ? "estado ok" : "estado error";
+      estadoDiv.textContent = resultado.mensaje;
+    } catch (err) {
+      estadoDiv.className = "estado error";
+      estadoDiv.textContent = "Error de conexion al guardar";
+    }
+  });
+
+  // Subir carta.pdf
+  document.getElementById("formCarta").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const estadoDiv = document.getElementById("estadoCarta");
+
+    try {
+      const resp = await fetch("/admin/carta", { method: "POST", body: formData });
+      const resultado = await resp.json();
+      estadoDiv.className = resultado.ok ? "estado ok" : "estado error";
+      estadoDiv.textContent = resultado.mensaje;
+    } catch (err) {
+      estadoDiv.className = "estado error";
+      estadoDiv.textContent = "Error de conexion al subir el PDF";
+    }
+  });
+</script>
+
+</body>
+</html>

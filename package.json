@@ -1,0 +1,25 @@
+{
+  "name": "wabotlocal",
+  "version": "1.0.0",
+  "description": "SaaS de Bot de WhatsApp para negocios locales - Reservas, Info y Reseñas automatizadas",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "cron": "node cron.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "twilio": "^5.3.0",
+    "googleapis": "^140.0.1",
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3",
+    "basic-auth": "^2.0.1",
+    "multer": "^1.4.5-lts.1",
+    "body-parser": "^1.20.2"
+  },
+  "license": "MIT"
+}
