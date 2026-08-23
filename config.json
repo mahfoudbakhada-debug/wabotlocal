@@ -1,13 +1,13 @@
 {
-  "nombre_negocio": "Peluqueria Estilo",
-  "mensaje_bienvenida": "Cortes, color y tratamientos capilares. Horario: Lunes a Sabado de 9:00 a 20:00.",
+  "nombre_negocio": "Clinica Dental Sonrisa",
+  "mensaje_bienvenida": "Limpiezas, blanqueamiento y urgencias. Horario: Lunes a Sabado de 9:00 a 20:00. 1-Precios 2-Cita 3-Urgencia",
   "servicios": [
-    { "nombre": "Corte de pelo", "precio": "15€", "duracion_min": 30 },
-    { "nombre": "Corte + Barba", "precio": "22€", "duracion_min": 45 },
-    { "nombre": "Tinte", "precio": "35€", "duracion_min": 60 },
-    { "nombre": "Peinado especial", "precio": "25€", "duracion_min": 45 }
+    { "nombre": "Limpieza dental", "precio": "40€", "duracion_min": 30 },
+    { "nombre": "Blanqueamiento", "precio": "120€", "duracion_min": 60 },
+    { "nombre": "Revision", "precio": "GRATIS", "duracion_min": 15 },
+    { "nombre": "Urgencia", "precio": "50€", "duracion_min": 30 }
   ],
-  "link_google_maps": "https://maps.google.com/?q=Peluqueria+Estilo",
+  "link_google_maps": "https://maps.google.com/?q=Clinica+Dental+Sonrisa",
   "link_resenas_google": "https://g.page/r/EJEMPLO/review",
   "telefono_humano": "+34631441910",
   "duracion_cita_min": 30,
