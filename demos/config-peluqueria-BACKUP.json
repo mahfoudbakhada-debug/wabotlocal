@@ -1,0 +1,17 @@
+{
+  "nombre_negocio": "Peluqueria Estilo",
+  "mensaje_bienvenida": "Cortes, tintes y peinados profesionales",
+  "servicios": [
+    { "nombre": "Corte hombre", "precio": "15€", "duracion_min": 30 },
+    { "nombre": "Corte mujer", "precio": "25€", "duracion_min": 45 },
+    { "nombre": "Tinte completo", "precio": "40€", "duracion_min": 90 },
+    { "nombre": "Mechas", "precio": "60€", "duracion_min": 120 },
+    { "nombre": "Peinado", "precio": "20€", "duracion_min": 30 }
+  ],
+  "link_google_maps": "https://maps.google.com/?q=Peluqueria+Estilo",
+  "link_resenas_google": "https://g.page/r/EJEMPLO/review",
+  "telefono_humano": "+34631441910",
+  "duracion_cita_min": 30,
+  "horario_apertura": "09:00",
+  "horario_cierre": "20:00"
+}
