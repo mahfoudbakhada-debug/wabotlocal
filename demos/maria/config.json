@@ -1,0 +1,7 @@
+{
+  "activo": true,
+  "nombre_negocio": "Peluquería María",
+  "mensaje_bienvenida": "Bienvenida a Peluquería María. 1-Precios 2-Cita 3-Ubicación",
+  "direccion": "https://maps.google.com/?q=Peluqueria+Maria",
+  "telefono": "631441910"
+}
