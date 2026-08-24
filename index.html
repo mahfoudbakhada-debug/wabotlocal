@@ -8,7 +8,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Plus Jakarta Sans',sans-serif}
 body{background:#fff;color:#111}
-.topbar{background:#111;color:#fff;text-align:center;padding:10px;font-size:13px;letter-spacing:0.2px}
+.topbar{background:#111;color:#fff;text-align:center;padding:10px;font-size:13px}
 nav{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:18px 20px}
 .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;letter-spacing:-0.5px}
 .logo-mark{width:36px;height:36px;background:#111;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
@@ -16,12 +16,11 @@ nav{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;al
 .btn-black{background:#111;color:#fff;padding:12px 22px;border-radius:100px;text-decoration:none;font-weight:700;font-size:14px}
 .hero{max-width:1200px;margin:10px auto 20px;padding:20px;display:flex;gap:60px;align-items:center;flex-wrap:wrap}
 .hero-left{flex:1;min-width:340px}
-.badge{background:#FFF0F5;color:#FF2D78;padding:7px 14px;border-radius:100px;font-size:11px;font-weight:800;letter-spacing:0.5px;display:inline-block;margin-bottom:16px}
+.badge{background:#FFF0F5;color:#FF2D78;padding:7px 14px;border-radius:100px;font-size:11px;font-weight:800;display:inline-block;margin-bottom:16px}
 .hero h1{font-size:58px;line-height:0.92;letter-spacing:-2.5px;font-weight:800}
 .hero h1 span{background:linear-gradient(90deg,#FF2D78,#FF8A4D);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .hero p{margin:18px 0 28px;color:#666;font-size:18px;line-height:1.5}
-.btn-green{background:#25D366;color:#fff;padding:19px 32px;border-radius:100px;text-decoration:none;font-weight:800;font-size:17px;display:inline-flex;align-items:center;gap:10px;box-shadow:0 14px 35px rgba(37,211,102,0.35);transition:0.2s}
-.btn-green:hover{transform:translateY(-3px);box-shadow:0 18px 45px rgba(37,211,102,0.45)}
+.btn-green{background:#25D366;color:#fff;padding:19px 32px;border-radius:100px;text-decoration:none;font-weight:800;font-size:17px;display:inline-flex;align-items:center;gap:10px;box-shadow:0 14px 35px rgba(37,211,102,0.35)}
 .hero-right{flex:1;min-width:340px;display:flex;justify-content:center}
 .iphone{width:320px;background:#000;border-radius:52px;padding:12px;box-shadow:0 50px 100px rgba(0,0,0,0.35)}
 .iphone-screen{background:#EFE7DE;border-radius:42px;overflow:hidden;padding:15px;height:580px;display:flex;flex-direction:column}
@@ -30,7 +29,6 @@ nav{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;al
 .msg{margin-top:18px;background:#fff;padding:14px 16px;border-radius:20px;border-bottom-left-radius:4px;font-size:14px;line-height:1.5;box-shadow:0 4px 20px rgba(0,0,0,0.06)}
 .grid{max-width:1200px;margin:40px auto;padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
 .card{background:#F8F7FF;padding:26px;border-radius:24px;border:1px solid #eee}
-.card h3{font-size:17px;margin-bottom:6px} .card p{color:#666;font-size:14px;line-height:1.4}
 .trust{max-width:1200px;margin:30px auto;text-align:center;padding:60px 20px;background:#111;color:#fff;border-radius:32px}
 .trust h2{font-size:36px;font-weight:800;letter-spacing:-1px} .trust p{color:#aaa;margin-top:10px}
 .footer{max-width:1200px;margin:0 auto;padding:30px 20px;text-align:center;color:#999;font-size:13px}
@@ -49,9 +47,9 @@ nav{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;al
 <div class="hero-left">
 <div class="badge">✂️ SISTEMA #1 PARA PELUQUERÍAS EN ESPAÑA</div>
 <h1>Tu peluquería <span id="hero-name">no pierde ni una cita más.</span></h1>
-<p>Las clientas de <strong id="desc-name">Peluquería Carmen</strong> reservan solas por WhatsApp a las 23:00 desde el sofá. Tú solo cortas. Maki Bot hace el resto.</p>
+<p>Las clientas de <strong id="desc-name">Peluquería Carmen</strong> reservan solas por WhatsApp. Tú solo cortas. Maki Bot hace el resto.</p>
 <div style="display:flex;gap:12px;flex-wrap:wrap">
-<a id="wa-btn" href="#" class="btn-green" target="_blank">💬 Probar WhatsApp de <span id="btn-name">Carmen</span> →</a>
+<a id="wa-btn" href="https://wa.me/34631441910?text=Hola%20vi%20la%20demo%20de%20Peluqueria%20Carmen%20de%20Maki%20Bot%20y%20quiero%20probarla" class="btn-green" target="_blank">💬 Probar WhatsApp de <span id="btn-name">Carmen</span> →</a>
 </div>
 <p style="margin-top:16px;font-size:12px;color:#999">✔ Sin permanencia · ✔ Instalación en 24h · ✔ Creado por Maki Bot</p>
 </div>
@@ -65,7 +63,6 @@ nav{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;al
 </div>
 <div class="msg">
 Hola guapa! Soy Maki, el asistente de <strong id="msg-name">Peluquería Carmen</strong> 👋<br><br>
-¿qué necesitas hoy?<br>
 1️⃣ Ver precios<br>
 2️⃣ Reservar cita<br>
 3️⃣ Ubicación
@@ -79,7 +76,7 @@ Hola guapa! Soy Maki, el asistente de <strong id="msg-name">Peluquería Carmen</
 </div>
 
 <div class="grid">
-<div class="card"><h3>⏰ Ahorra 2h al día</h3><p>Se acabaron las llamadas en mitad del tinte. Maki contesta por ti, siempre.</p></div>
+<div class="card"><h3>⏰ Ahorra 2h al día</h3><p>Se acabaron las llamadas en mitad del tinte. Maki contesta por ti.</p></div>
 <div class="card" style="background:#FFF0F5"><h3>📈 +30% más reservas</h3><p>Reservan fuera de horario. Tú duermes, Maki Bot cierra citas.</p></div>
 <div class="card" style="background:#F0FFF5"><h3>🤖 100% automático</h3><p>Creado por Maki Bot. Sin apps nuevas, solo WhatsApp.</p></div>
 </div>
@@ -88,28 +85,21 @@ Hola guapa! Soy Maki, el asistente de <strong id="msg-name">Peluquería Carmen</
 <h2 id="trust-title">Peluquería Carmen ya no pierde citas gracias a Maki Bot.</h2>
 <p>Esta es la demo exacta que verán tus clientas.</p>
 <br><br>
-<a id="wa-btn2" href="#" class="btn-green" target="_blank">Quiero Maki Bot para mi peluquería →</a>
+<a id="wa-btn2" href="https://wa.me/34631441910?text=Hola%20quiero%20Maki%20Bot%20para%20mi%20peluqueria" class="btn-green" target="_blank">Quiero Maki Bot para mi peluquería →</a>
 </div>
 
-<div class="footer">
-© 2026 <span id="footer-name">Maki Bot</span> — Automatización con sabor japonés 🍣 para negocios locales
-</div>
+<div class="footer">© 2026 Maki Bot 🍣</div>
 
 <script>
 fetch('./config.json').then(r=>r.json()).then(c=>{
  const nombre = c.nombre_negocio || "Peluquería Carmen";
- const numero = (c.telefono || c.numero_whatsapp || "631441910").toString().replace(/\D/g,'');
- const wa = "34"+numero.slice(-9);
- const link = "https://wa.me/"+wa+"?text=Hola%20"+encodeURIComponent(nombre)+"%20vi%20la%20demo%20de%20Maki%20Bot%20y%20quiero%20probarla";
- ["top-name","hero-name","desc-name","btn-name","phone-name","msg-name","footer-name"].forEach(id=>{
+ ["top-name","hero-name","desc-name","btn-name","phone-name","msg-name"].forEach(id=>{
    const el=document.getElementById(id);
    if(el) el.textContent=nombre;
  });
  document.getElementById('trust-title').textContent = nombre+" ya no pierde citas gracias a Maki Bot.";
  document.getElementById('page-title').textContent = nombre+" | Demo por Maki Bot";
- document.getElementById('wa-btn').href=link;
- document.getElementById('wa-btn2').href=link;
-});
+}).catch(()=>{});
 </script>
 </body>
 </html>
