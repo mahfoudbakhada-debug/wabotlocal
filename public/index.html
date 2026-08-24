@@ -3,42 +3,77 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="page-title">Peluquería Demo</title>
+<title id="page-title">Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-body{font-family:Arial,sans-serif;background:#f5f5f5;text-align:center;padding:20px}
-.card{background:white;max-width:360px;margin:0 auto;border-radius:20px;padding:15px;box-shadow:0 10px 30px rgba(0,0,0,0.1)}
-.chat{background:#e5ddd5;border-radius:10px;padding:10px;text-align:left}
-.msg{background:white;padding:10px;border-radius:10px;margin:10px 0}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{background:#fffafb;color:#2d2d2d}
+header{padding:40px 20px;text-align:center;background:linear-gradient(135deg,#ffeef3,#fff)}
+header h1{font-size:42px;font-weight:700;color:#1a1a1a}
+header h1 span{color:#e84a7a}
+header p{color:#666;margin-top:10px;font-size:18px}
+.container{max-width:1100px;margin:40px auto;display:flex;gap:50px;align-items:center;justify-content:center;padding:20px;flex-wrap:wrap}
+.phone{width:320px;background:#fff;border:12px solid #1a1a1a;border-radius:40px;padding:15px;box-shadow:0 20px 60px rgba(0,0,0,0.15)}
+.phone-top{display:flex;align-items:center;gap:10px;background:#f6f5f7;padding:10px;border-radius:15px;margin-bottom:10px}
+.avatar{width:40px;height:40px;background:#e84a7a;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700}
+.chat{background:#f0eef4;border-radius:20px;padding:20px}
+.bubble{background:#fff;padding:14px;border-radius:18px;font-size:14px;line-height:1.4;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.right h2{font-size:32px;line-height:1.2}
+.right ul{list-style:none;margin:20px 0}
+.right ul li{margin:10px 0;font-size:17px}
+.btn{display:inline-block;background:#25D366;color:#fff;padding:16px 32px;border-radius:50px;font-weight:700;text-decoration:none;font-size:18px;box-shadow:0 10px 20px rgba(37,211,102,0.3);transition:0.2s}
+.btn:hover{transform:scale(1.05)}
 </style>
 </head>
 <body>
 
-<h1 id="titulo-negocio">Peluquería</h1>
-<p>Tu peluquería reserva sola por WhatsApp</p>
+<header>
+  <h1 id="header-title">Peluquería</h1>
+  <p>Tu peluquería reserva sola por WhatsApp 24/7</p>
+</header>
 
-<div class="card">
-  <div class="chat">
-    <strong id="chat-nombre">Peluquería</strong>
-    <div class="msg">
-      Hola! Soy el asistente virtual de <span class="nombre-dinamico">tu peluquería</span> 👋<br><br>
-      1️⃣ Ver servicios/precios<br>
-      2️⃣ Reservar cita<br>
-      3️⃣ Hablar con una persona
+<div class="container">
+  <div class="phone">
+    <div class="phone-top">
+      <div class="avatar">✂️</div>
+      <div><strong id="phone-name">Peluquería</strong><br><small style="color:#25D366">● En línea</small></div>
     </div>
+    <div class="chat">
+      <div class="bubble">
+        Hola! Soy el asistente virtual de <strong id="bubble-name">tu peluquería</strong> 👋<br><br>
+        1️⃣ Ver servicios/precios<br>
+        2️⃣ Reservar cita<br>
+        3️⃣ Hablar con una persona
+      </div>
+    </div>
+  </div>
+
+  <div class="right">
+    <h2>Olvídate de perder citas por no contestar el móvil.</h2>
+    <ul>
+      <li>✅ Reserva automática 24 horas</li>
+      <li>✅ Sin apps raras para tus clientas</li>
+      <li>✅ Todo por WhatsApp, lo que ya usan</li>
+    </ul>
+    <a id="wa-btn" class="btn" href="#" target="_blank">Probar demo en WhatsApp →</a>
+    <p style="margin-top:15px;color:#888;font-size:13px">Demo personalizada para: <strong id="footer-name">tu peluquería</strong></p>
   </div>
 </div>
 
 <script>
-// ESTO ES LO QUE HACE LA MAGIA
 fetch('./config.json')
-  .then(res => res.json())
-  .then(config => {
-    const nombre = config.nombre_negocio;
-    document.getElementById('titulo-negocio').textContent = nombre;
-    document.getElementById('chat-nombre').textContent = nombre;
-    document.getElementById('page-title').textContent = nombre + " - Reserva por WhatsApp";
-    document.querySelectorAll('.nombre-dinamico').forEach(el => el.textContent = nombre);
-  });
+.then(r=>r.json())
+.then(c=>{
+  const nombre = c.nombre_negocio || "Tu Peluquería";
+  const numero = c.numero_whatsapp || "34600000000";
+  document.getElementById('header-title').textContent = nombre;
+  document.getElementById('phone-name').textContent = nombre;
+  document.getElementById('bubble-name').textContent = nombre;
+  document.getElementById('footer-name').textContent = nombre;
+  document.getElementById('page-title').textContent = nombre + " | Reserva automática";
+  document.getElementById('wa-btn').href = "https://wa.me/"+numero+"?text=Hola%20quiero%20probar%20la%20demo%20de%20"+encodeURIComponent(nombre);
+  document.getElementById('wa-btn').textContent = "Probar "+nombre+" en WhatsApp →";
+});
 </script>
 
 </body>
