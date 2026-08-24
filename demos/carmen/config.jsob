@@ -1,0 +1,7 @@
+{
+  "activo": true,
+  "nombre_negocio": "Peluquería Carmen",
+  "mensaje_bienvenida": "Bienvenida a Peluquería Carmen. 1-Precios 2-Cita 3-Ubicación",
+  "direccion": "https://maps.google.com/?q=Peluqueria+Carmen",
+  "telefono": "631441910"
+}
