@@ -1,120 +1,114 @@
 const express = require('express');
-const path = require('path');
 const { google } = require('googleapis');
-
 const app = express();
 app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-function getGoogleAuth() {
+function getAuth() {
   const b64 = process.env.GOOGLE_CREDS_B64;
-  const json = JSON.parse(Buffer.from(b64, 'base64').toString('utf-8'));
+  const creds = JSON.parse(Buffer.from(b64, 'base64').toString('utf-8'));
   return new google.auth.GoogleAuth({
-    credentials: json,
+    credentials: creds,
     scopes: ['https://www.googleapis.com/auth/calendar']
   });
 }
-const calendarId = process.env.GOOGLE_CALENDAR_ID;
 
 function parseFecha(texto) {
-  const ahora = new Date();
   texto = texto.toLowerCase();
-  let fecha = new Date();
-  if (texto.includes('mañana')) fecha.setDate(ahora.getDate() + 1);
-  if (texto.includes('pasado mañana')) fecha.setDate(ahora.getDate() + 2);
+  const ahora = new Date();
+  let fecha = new Date(); fecha.setSeconds(0,0);
 
-  const match = texto.match(/(\d{1,2})(?::(\d{2}))?\s*h/);
-  if (match) {
-    fecha.setHours(parseInt(match[1]), match[2]? parseInt(match[2]) : 0, 0, 0);
-    return fecha;
+  if (texto.includes('pasado mañana')) fecha.setDate(ahora.getDate()+2);
+  else if (texto.includes('mañana')) fecha.setDate(ahora.getDate()+1);
+  else {
+    const dias = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+    for(let i=0;i<dias.length;i++){
+      if(texto.includes(dias[i])){
+        let diff = i - ahora.getDay();
+        if(diff <= 0) diff += 7;
+        fecha.setDate(ahora.getDate()+diff);
+        break;
+      }
+    }
   }
-  const match2 = texto.match(/a las (\d{1,2})/);
-  if (match2) {
-    fecha.setHours(parseInt(match2[1]), 0, 0, 0);
-    return fecha;
-  }
-  return null;
+  const m = texto.match(/(\d{1,2})[:h](\d{2})?/);
+  if(!m) return null;
+  fecha.setHours(parseInt(m[1]), m[2]?parseInt(m[2]):0, 0, 0);
+  return fecha;
 }
 
-app.post('/whatsapp', async (req, res) => {
+app.post('/whatsapp', async (req,res)=>{
   try {
-    const mensajeCliente = req.body.Body || '';
-    const telefono = req.body.From || '';
-    const fechaInicio = parseFecha(mensajeCliente);
+    const msg = req.body.Body || '';
+    const fechaInicio = parseFecha(msg);
 
-    if (!fechaInicio) {
-      return res.set('Content-Type','text/xml').send(
-        `<Response><Message>¡Hola! Soy Maki Bot de tu peluquería 👋
+    if(!fechaInicio) {
+      return res.set('Content-Type','text/xml').send(`<Response><Message>¡Hola! Soy Maki, tu asistente de Peluquería Carmen 💈✨
 
-Para reservar dime día y hora, por ejemplo:
-"mañana a las 17:00" o "viernes 11h"
+Encantada de ayudarte a reservar.
 
-Horario: Lunes a Sábado de 10:00 a 20:00</Message></Response>`
-      );
+Dime por favor qué día y hora te viene bien, por ejemplo:
+• "Mañana a las 17:00"
+• "El lunes a las 11h"
+• "Viernes a las 18:30"
+
+Te confirmo al instante. Nuestro horario es de Lunes a Sábado de 10:00 a 20:00.</Message></Response>`);
     }
 
-    const fechaFin = new Date(fechaInicio.getTime() + 60 * 60 * 1000);
+    const fechaFin = new Date(fechaInicio.getTime()+60*60*1000);
     const hora = fechaInicio.getHours();
     const dia = fechaInicio.getDay();
 
-    if (dia === 0 || hora < 10 || hora >= 20) {
-      return res.set('Content-Type','text/xml').send(
-        `<Response><Message>En ese horario estamos cerrados 😕
+    if(dia===0 || hora<10 || hora>=20){
+      return res.set('Content-Type','text/xml').send(`<Response><Message>Gracias por tu mensaje 😊
 
-Nuestro horario es de Lunes a Sábado de 10:00 a 20:00.
-¿Te viene bien otro día a esa misma hora?</Message></Response>`
-      );
+En ese horario tenemos el salón cerrado. Nuestro horario de atención es de Lunes a Sábado de 10:00 a 20:00.
+
+¿Te podría venir bien a las 17:00 o a las 11:00 del mismo día? Dime otra hora y te lo miro enseguida 💈</Message></Response>`);
     }
 
-    const auth = await getGoogleAuth();
-    const calendar = google.calendar({ version: 'v3', auth });
+    const auth = await getAuth();
+    const calendar = google.calendar({version:'v3', auth});
+    const calendarId = process.env.GOOGLE_CALENDAR_ID;
 
-    const freeBusy = await calendar.freebusy.query({
-      requestBody: {
+    const busy = await calendar.freebusy.query({
+      requestBody:{
         timeMin: fechaInicio.toISOString(),
         timeMax: fechaFin.toISOString(),
-        items: [{ id: calendarId }]
+        items:[{id: calendarId}]
       }
     });
 
-    if (freeBusy.data.calendars[calendarId].busy.length > 0) {
-      return res.set('Content-Type','text/xml').send(
-        `<Response><Message>Esa hora ya está reservada 😕
+    if(busy.data.calendars[calendarId].busy.length>0){
+      return res.set('Content-Type','text/xml').send(`<Response><Message>Vaya, esa hora ya la tenemos reservada y me encantaría atenderte 🥲
 
-¿Te va bien a las ${hora + 1}:00 del mismo día?
-Si no, dime otra hora y te lo miro al momento.</Message></Response>`
-      );
+¿Te podría encajar a las ${hora+1}:00 el mismo día? Si no, dime otra hora que te venga mejor y te confirmo disponibilidad al momento.</Message></Response>`);
     }
 
     await calendar.events.insert({
       calendarId,
-      requestBody: {
-        summary: `Cita - Cliente ${telefono}`,
-        description: `Reserva vía Maki Bot - Cliente: ${telefono}`,
-        start: { dateTime: fechaInicio.toISOString(), timeZone: 'Europe/Madrid' },
-        end: { dateTime: fechaFin.toISOString(), timeZone: 'Europe/Madrid' }
+      requestBody:{
+        summary: `Cita - ${req.body.From}`,
+        description: `Cliente: ${req.body.From} - Mensaje: ${msg}`,
+        start:{dateTime: fechaInicio.toISOString(), timeZone:'Europe/Madrid'},
+        end:{dateTime: fechaFin.toISOString(), timeZone:'Europe/Madrid'}
       }
     });
 
-    const bonito = fechaInicio.toLocaleDateString('es-ES', {
-      weekday: 'long', day: 'numeric', month: 'long',
-      hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid'
-    });
+    const bonito = fechaInicio.toLocaleString('es-ES',{weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit', timeZone:'Europe/Madrid'});
 
-    return res.set('Content-Type','text/xml').send(
-      `<Response><Message>¡Perfecto! ✅ Reserva confirmada.
+    return res.set('Content-Type','text/xml').send(`<Response><Message>¡Perfecto! Reserva confirmada ✅💈
 
-Te espero el ${bonito}.
-Soy Maki Bot de tu peluquería 💈 ¡Gracias por reservar!</Message></Response>`
-    );
-  } catch (e) {
-    console.error(e);
-    return res.set('Content-Type','text/xml').send(`<Response><Message>Error técnico, ¿me repites día y hora? 🙏</Message></Response>`);
+Te esperamos el *${bonito}* en Peluquería Carmen.
+
+Hemos reservado 1 hora para ti. Si necesitas cambiar o cancelar, solo avísanos por aquí.
+
+¡Muchas gracias por confiar en nosotros! ✨</Message></Response>`);
+
+  } catch(e){
+    console.error('ERROR:', e.message);
+    return res.set('Content-Type','text/xml').send(`<Response><Message>Disculpa, hemos tenido un pequeño problema técnico 🙏 ¿Me podrías repetir el día y la hora que te interesa? Ej: "Lunes a las 17:00"</Message></Response>`);
   }
 });
 
-app.listen(process.env.PORT || 10000, () => console.log('Maki Bot Live'));
+app.get('/', (req,res)=>res.send('Maki Bot Live Profesional'));
+app.listen(process.env.PORT||10000, ()=>console.log('Maki Bot Live'));
