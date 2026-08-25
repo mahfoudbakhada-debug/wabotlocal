@@ -4,7 +4,6 @@ const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// Leemos el base64 que acabas de crear
 const credsJson = Buffer.from(process.env.GOOGLE_CREDS_B64, 'base64').toString();
 const creds = JSON.parse(credsJson);
 
@@ -12,7 +11,6 @@ const auth = new google.auth.GoogleAuth({
   credentials: creds,
   scopes: ['https://www.googleapis.com/auth/calendar'],
 });
-
 const calendar = google.calendar({ version: 'v3', auth });
 
 app.get('/', (req,res)=>res.send('wabotlocal OK'));
@@ -32,7 +30,7 @@ app.post('/webhook', async (req,res)=>{
       const fin=new Date(fecha);
       fin.setHours(hora+1);
       await calendar.events.insert({
-        calendarId:'primary',
+        calendarId:'mahfoudbakhada@gmail.com',
         requestBody:{
           summary:`Cita WhatsApp: ${mensaje}`,
           description: mensaje,
@@ -46,5 +44,4 @@ app.post('/webhook', async (req,res)=>{
   res.set('Content-Type','text/xml');
   res.send(`<Response><Message>${respuesta}</Message></Response>`);
 });
-
 app.listen(process.env.PORT||10000, ()=>console.log('OK'));
