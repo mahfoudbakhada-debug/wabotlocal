@@ -30,7 +30,7 @@ app.post('/webhook', async (req,res)=>{
       const fin=new Date(fecha);
       fin.setHours(hora+1);
       await calendar.events.insert({
-        calendarId:'mahfoudbakhada@gmail.com',
+        calendarId:'primary',
         requestBody:{
           summary:`Cita WhatsApp: ${mensaje}`,
           description: mensaje,
