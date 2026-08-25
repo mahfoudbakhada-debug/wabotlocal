@@ -1,93 +1,108 @@
 const express = require('express');
 const { google } = require('googleapis');
-const fs = require('fs');
-const path = require('path');
+const OpenAI = require('openai');
 
 const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
 
-// --- 1. CREDENCIALES B64 (forma más segura para Render) ---
-let auth;
-try {
-  const credsJson = Buffer.from(process.env.GOOGLE_CREDS_B64, 'base64').toString('utf-8');
-  const creds = JSON.parse(credsJson);
-  auth = new google.auth.GoogleAuth({
-    credentials: creds,
-    scopes: ['https://www.googleapis.com/auth/calendar'],
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// --- CONFIG GOOGLE ---
+function getGoogleAuth() {
+  const b64 = process.env.GOOGLE_CREDS_B64;
+  if (!b64) throw new Error('Falta GOOGLE_CREDS_B64');
+  const json = JSON.parse(Buffer.from(b64, 'base64').toString('utf-8'));
+  console.log('Credenciales B64 cargadas:', json.client_email);
+  const auth = new google.auth.GoogleAuth({
+    credentials: json,
+    scopes: ['https://www.googleapis.com/auth/calendar']
   });
-  console.log('✅ Credenciales B64 cargadas');
-} catch (e) {
-  console.error('❌ Falta GOOGLE_CREDS_B64', e.message);
+  return auth;
 }
+const calendarId = process.env.GOOGLE_CALENDAR_ID;
+console.log('Calendar:', calendarId);
 
-const calendar = google.calendar({ version: 'v3', auth });
-const calendarId = process.env.GOOGLE_CALENDAR_ID || '581c8e504173a3db26b6047b27ac8324a7d3de7cc13e1f54878a6d473b73822a@group.calendar.google.com';
-console.log('📅 Calendar:', calendarId);
+app.get('/', (req, res) => res.send('Maki Bot listo ✅'));
 
-// --- 2. CANDADO DE PAGO ---
-try {
-  const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf-8'));
-  if (cfg.activo === false) { console.log('🚫 NO PAGÓ - BOT OFF'); process.exit(0); }
-} catch {}
-
-app.get('/', (req,res) => res.sendFile(path.join(__dirname, "public", "index.html")));
-app.get('/ping', (req,res) => res.send('Maki Bot Black & Gold 24/7 OK'));
-
-app.post('/webhook', async (req,res) => {
-  const body = req.body.Body || '';
-  const mensaje = body.toLowerCase();
-  const from = req.body.From || '';
-  console.log(`📩 ${from}: ${body}`);
-
-  let respuesta = `Hola! Soy Maki de tu peluquería 👋\n\nEscribe:\n1️⃣ Precios\n2️⃣ Reservar ej: "mañana 17h"`;
-
+// --- WEBHOOK WHATSAPP (Twilio) ---
+app.post('/whatsapp', async (req, res) => {
   try {
-    if (mensaje.includes('mañana') || mensaje.includes('hoy') || /\d{1,2}h/.test(mensaje)) {
-      let hora = 10;
-      const m = mensaje.match(/(\d{1,2})/);
-      if (m) hora = parseInt(m[1]);
+    const mensajeCliente = req.body.Body || '';
+    const telefono = req.body.From || '';
+    console.log(`Mensaje de ${telefono}: ${mensajeCliente}`);
 
-      // Fix inteligente: 5 -> 17h, no 5am
-      if (hora <= 7) hora += 12;
-      if (hora < 9) hora = 10;
-      if (hora > 20) hora = 18;
-
-      const fecha = new Date();
-      if (mensaje.includes('mañana')) fecha.setDate(fecha.getDate() + 1);
-      fecha.setHours(hora, 0, 0, 0);
-      const fin = new Date(fecha); fin.setHours(hora + 1);
-
-      // Ver si está libre
-      const free = await calendar.freebusy.query({
-        requestBody: { timeMin: fecha.toISOString(), timeMax: fin.toISOString(), items: [{ id: calendarId }] }
-      });
-
-      if (free.data.calendars[calendarId].busy.length > 0) {
-        respuesta = `Las ${hora}:00 está ocupada 😕 ¿Te va bien a las ${hora+1}:00?`;
-      } else {
-        await calendar.events.insert({
-          calendarId,
-          requestBody: {
-            summary: `💇‍♀️ Cita Maki Bot - ${from.replace('whatsapp:','')}`,
-            description: `Original: ${body}`,
-            start: { dateTime: fecha.toISOString(), timeZone: 'Europe/Madrid' },
-            end: { dateTime: fin.toISOString(), timeZone: 'Europe/Madrid' },
-          },
-        });
-        respuesta = `¡Hecho! ✅ Mañana a las ${hora}:00 reservado. Te esperamos!`;
-      }
-    } else if (mensaje.includes('precio') || mensaje === '1') {
-      respuesta = "💇‍♀️ Corte 15€ | Color 35€ | Mechas 50€\n\nReserva escribiendo: mañana 17h";
+    // 1. Entender fecha con OpenAI
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: `Eres asistente de Peluquería Carmen en Barcelona. Hoy es ${new Date().toISOString()}. Devuelve SOLO un JSON con {"fecha": "ISO", "nombre": "nombre si lo dice"}. Si pide mañana a las 11, pon fecha mañana 11:00 Europe/Madrid. Si no hay fecha, pon null.` },
+        { role: 'user', content: mensajeCliente }
+      ]
+    });
+    
+    let datos = JSON.parse(completion.choices[0].message.content.replace(/```json|```/g, '').trim());
+    if (!datos.fecha) {
+      const respuesta = '¡Hola! Soy Carmen de Peluquería Carmen 💇‍♀️ ¿Qué día y hora te va bien? Estamos de Lunes a Sábado de 10:00 a 20:00.';
+      res.set('Content-Type', 'text/xml');
+      return res.send(`<Response><Message>${respuesta}</Message></Response>`);
     }
-  } catch (e) {
-    console.error('ERROR:', e);
-    respuesta = `Error temporal, dime la hora y lo guardo manual.`;
-  }
 
-  res.set('Content-Type', 'text/xml');
-  res.send(`<Response><Message>${respuesta}</Message></Response>`);
+    const fechaInicio = new Date(datos.fecha);
+    const fechaFin = new Date(fechaInicio.getTime() + 60 * 60 * 1000); // 1 hora
+
+    // 2. CONTROL HORARIO REAL (1)
+    const hora = fechaInicio.getHours();
+    const dia = fechaInicio.getDay();
+    if (dia === 0 || hora < 10 || hora >= 20) {
+      const respuesta = 'Lo siento, estamos cerrados 😕 Nuestro horario es de Lunes a Sábado de 10:00 a 20:00. ¿Te va bien otro día y hora?';
+      res.set('Content-Type', 'text/xml');
+      return res.send(`<Response><Message>${respuesta}</Message></Response>`);
+    }
+
+    const auth = await getGoogleAuth();
+    const calendar = google.calendar({ version: 'v3', auth });
+
+    // 3. CONTROL NO PISAR CITAS (2)
+    const freeBusy = await calendar.freebusy.query({
+      requestBody: {
+        timeMin: fechaInicio.toISOString(),
+        timeMax: fechaFin.toISOString(),
+        items: [{ id: calendarId }]
+      }
+    });
+    const ocupado = freeBusy.data.calendars[calendarId].busy.length > 0;
+    if (ocupado) {
+      const respuesta = `Esa hora ya está reservada 😕 ¿Te viene bien a las ${hora + 1}:00 o a las ${hora + 2}:00 del mismo día?`;
+      res.set('Content-Type', 'text/xml');
+      return res.send(`<Response><Message>${respuesta}</Message></Response>`);
+    }
+
+    // 4. CREAR CITA (3) Mensaje Pro + Nombre
+    await calendar.events.insert({
+      calendarId: calendarId,
+      requestBody: {
+        summary: `Corte - ${datos.nombre || 'Cliente'} ${telefono}`,
+        description: `Cliente: ${datos.nombre || ''}\nTel: ${telefono}\nMensaje original: ${mensajeCliente}`,
+        start: { dateTime: fechaInicio.toISOString(), timeZone: 'Europe/Madrid' },
+        end: { dateTime: fechaFin.toISOString(), timeZone: 'Europe/Madrid' },
+        attendees: [{ email: 'mahfoudbakhada@gmail.com' }]
+      }
+    });
+
+    console.log('¡Cita creada!');
+    const diaBonito = fechaInicio.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' });
+    const respuestaFinal = `¡Perfecto! ✅ Soy Carmen de Peluquería Carmen 💇‍♀️ Te espero el ${diaBonito}. Si no puedes venir avísame por aquí. ¡Gracias!`;
+
+    res.set('Content-Type', 'text/xml');
+    return res.send(`<Response><Message>${respuestaFinal}</Message></Response>`);
+
+  } catch (e) {
+    console.error('Error:', e.message);
+    res.set('Content-Type', 'text/xml');
+    return res.send(`<Response><Message>Uy, ha habido un error al crear la cita, ¿me repites el día y hora por favor?</Message></Response>`);
+  }
 });
 
-app.listen(process.env.PORT || 10000, () => console.log('🤖 Maki Bot listo'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Bot en puerto ${PORT}`));
