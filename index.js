@@ -5,9 +5,16 @@ app.use(express.urlencoded({ extended: false }));
 
 const CALENDAR_ID = 'd4e0154eadbb84f04f3a38d2cb52859e0496706c42b1eee72f06d6cd1eec524a@group.calendar.google.com';
 const memoria = new Map();
-
-// FORMATO HORA REAL MADRID
 const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:00`;
+const bonitoHora = (d) => {
+  const dias = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+  return `${dias[d.getDay()]} a las ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+};
+const bonitoLargo = (d) => {
+  const dias = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return `${dias[d.getDay()]}, ${d.getDate()} de ${meses[d.getMonth()]} a las ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+};
 
 function getAuth() {
   const b64 = (process.env.GOOGLE_CREDS_B64 || '').trim();
@@ -74,11 +81,10 @@ app.post('/whatsapp', async (req,res)=>{
         }
       });
       memoria.delete(from);
-      const bonito = fechaInicio.toLocaleString('es-ES',{weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit', timeZone:'Europe/Madrid'});
       return res.set('Content-Type','text/xml').send(`<Response><Message>¡Perfecto ${nombreCompleto}! ✅💖
 
 💈 *Peluquería Carmen*
-📅 *${bonito}*
+📅 *${bonitoLargo(fechaInicio)}*
 📍 Calle Mayor, 12
 
 Te esperamos ✨</Message></Response>`);
@@ -109,8 +115,7 @@ Pero tengo libre a las ${h+1}:00 o a las ${h+2}:00 el mismo día. ¿Te reservo? 
     }
     const prev = memoria.get(from) || {};
     memoria.set(from, {...prev, fecha: fechaInicio, ts: Date.now(), estado: 'esperando_nombre', msgOriginal: body });
-    const bonito = fechaInicio.toLocaleString('es-ES',{weekday:'long', hour:'2-digit', minute:'2-digit', timeZone:'Europe/Madrid'});
-    return res.set('Content-Type','text/xml').send(`<Response><Message>¡Genial! Tengo libre el ${bonito} ✅
+    return res.set('Content-Type','text/xml').send(`<Response><Message>¡Genial! Tengo libre el ${bonitoHora(fechaInicio)} ✅
 
 ¿Me dices tu nombre y apellido para reservarlo?</Message></Response>`);
   } catch(e){
@@ -118,5 +123,5 @@ Pero tengo libre a las ${h+1}:00 o a las ${h+2}:00 el mismo día. ¿Te reservo? 
     return res.set('Content-Type','text/xml').send(`<Response><Message>Error: ${e.message}</Message></Response>`);
   }
 });
-app.get('/', (req,res)=>res.send('Maki Bot Live FINAL'));
+app.get('/', (req,res)=>res.send('Maki Bot FINAL V7 Hora Fix'));
 app.listen(process.env.PORT||10000, ()=>console.log('Live'));
