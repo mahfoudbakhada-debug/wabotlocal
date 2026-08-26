@@ -6,6 +6,9 @@ app.use(express.urlencoded({ extended: false }));
 const CALENDAR_ID = 'd4e0154eadbb84f04f3a38d2cb52859e0496706c42b1eee72f06d6cd1eec524a@group.calendar.google.com';
 const memoria = new Map();
 
+// FORMATO HORA REAL MADRID
+const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:00`;
+
 function getAuth() {
   const b64 = (process.env.GOOGLE_CREDS_B64 || '').trim();
   const creds = JSON.parse(Buffer.from(b64, 'base64').toString('utf-8'));
@@ -53,7 +56,7 @@ app.post('/whatsapp', async (req,res)=>{
 
     if(memoria.has(from) && memoria.get(from).estado === 'esperando_nombre'){
       const nombreCompleto = body.trim().replace(/\b\w/g, l => l.toUpperCase());
-      if(nombreCompleto.length < 3 ||!nombreCompleto.includes(' ')){
+      if(nombreCompleto.length < 3 || !nombreCompleto.includes(' ')){
         return res.set('Content-Type','text/xml').send(`<Response><Message>Ponme nombre y apellido porfa 😊 Ej: Maria Garcia</Message></Response>`);
       }
       const mem = memoria.get(from);
@@ -65,9 +68,9 @@ app.post('/whatsapp', async (req,res)=>{
         calendarId: CALENDAR_ID,
         requestBody:{
           summary: `💈 ${nombreCompleto} - Cita`,
-          description: `Cliente: ${nombreCompleto} (${from}) - ${mem.msgOriginal}`,
-          start:{dateTime: fechaInicio.toISOString(), timeZone:'Europe/Madrid'},
-          end:{dateTime: fechaFin.toISOString(), timeZone:'Europe/Madrid'}
+          description: `Cliente: ${nombreCompleto} (${from})`,
+          start:{dateTime: fmt(fechaInicio), timeZone:'Europe/Madrid'},
+          end:{dateTime: fmt(fechaFin), timeZone:'Europe/Madrid'}
         }
       });
       memoria.delete(from);
@@ -95,8 +98,8 @@ Te esperamos ✨</Message></Response>`);
     try { await calendar.calendarList.insert({ requestBody: { id: CALENDAR_ID } }); } catch(e){}
     const check = await calendar.events.list({
       calendarId: CALENDAR_ID,
-      timeMin: fechaInicio.toISOString(),
-      timeMax: fechaFin.toISOString(),
+      timeMin: new Date(fechaInicio.getTime()-2*60*60*1000).toISOString(),
+      timeMax: new Date(fechaFin.getTime()-2*60*60*1000).toISOString(),
       singleEvents: true
     });
     if(check.data.items && check.data.items.length>0){
@@ -110,11 +113,10 @@ Pero tengo libre a las ${h+1}:00 o a las ${h+2}:00 el mismo día. ¿Te reservo? 
     return res.set('Content-Type','text/xml').send(`<Response><Message>¡Genial! Tengo libre el ${bonito} ✅
 
 ¿Me dices tu nombre y apellido para reservarlo?</Message></Response>`);
-
   } catch(e){
     console.error(e.message);
     return res.set('Content-Type','text/xml').send(`<Response><Message>Error: ${e.message}</Message></Response>`);
   }
 });
-app.get('/', (req,res)=>res.send('Maki Bot Live V5'));
+app.get('/', (req,res)=>res.send('Maki Bot Live FINAL'));
 app.listen(process.env.PORT||10000, ()=>console.log('Live'));
