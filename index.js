@@ -4,7 +4,7 @@ const app = express();
 app.use(express.urlencoded({ extended: false }));
 
 function getAuth() {
-  const b64 = process.env.GOOGLE_CREDS_B64;
+  const b64 = (process.env.GOOGLE_CREDS_B64 || '').trim();
   const creds = JSON.parse(Buffer.from(b64, 'base64').toString('utf-8'));
   return new google.auth.GoogleAuth({
     credentials: creds,
@@ -16,7 +16,6 @@ function parseFecha(texto) {
   texto = texto.toLowerCase();
   const ahora = new Date();
   let fecha = new Date(); fecha.setSeconds(0,0);
-
   if (texto.includes('pasado mañana')) fecha.setDate(ahora.getDate()+2);
   else if (texto.includes('mañana')) fecha.setDate(ahora.getDate()+1);
   else {
@@ -40,75 +39,53 @@ app.post('/whatsapp', async (req,res)=>{
   try {
     const msg = req.body.Body || '';
     const fechaInicio = parseFecha(msg);
-
     if(!fechaInicio) {
-      return res.set('Content-Type','text/xml').send(`<Response><Message>¡Hola! Soy Maki, tu asistente de Peluquería Carmen 💈✨
-
-Encantada de ayudarte a reservar.
-
-Dime por favor qué día y hora te viene bien, por ejemplo:
-• "Mañana a las 17:00"
-• "El lunes a las 11h"
-• "Viernes a las 18:30"
-
-Te confirmo al instante. Nuestro horario es de Lunes a Sábado de 10:00 a 20:00.</Message></Response>`);
+      return res.set('Content-Type','text/xml').send(`<Response><Message>¡Hola! Soy Maki, asistente de Peluquería Carmen 💈✨
+Dime día y hora: Ej "Lunes a las 17:00" o "Mañana a las 11h". Horario L-S 10:00-20:00.</Message></Response>`);
     }
-
     const fechaFin = new Date(fechaInicio.getTime()+60*60*1000);
     const hora = fechaInicio.getHours();
     const dia = fechaInicio.getDay();
-
     if(dia===0 || hora<10 || hora>=20){
-      return res.set('Content-Type','text/xml').send(`<Response><Message>Gracias por tu mensaje 😊
-
-En ese horario tenemos el salón cerrado. Nuestro horario de atención es de Lunes a Sábado de 10:00 a 20:00.
-
-¿Te podría venir bien a las 17:00 o a las 11:00 del mismo día? Dime otra hora y te lo miro enseguida 💈</Message></Response>`);
+      return res.set('Content-Type','text/xml').send(`<Response><Message>Gracias por tu mensaje 😊 En ese horario estamos cerrados. Horario Lunes a Sábado 10:00-20:00. ¿Te va bien a las 11:00 o 17:00?</Message></Response>`);
     }
 
     const auth = await getAuth();
     const calendar = google.calendar({version:'v3', auth});
-    const calendarId = process.env.GOOGLE_CALENDAR_ID;
+    const calendarId = (process.env.GOOGLE_CALENDAR_ID || '').trim();
+    console.log('Usando calendarId:', calendarId);
 
-    const busy = await calendar.freebusy.query({
-      requestBody:{
-        timeMin: fechaInicio.toISOString(),
-        timeMax: fechaFin.toISOString(),
-        items:[{id: calendarId}]
-      }
+    // NUEVO METODO que no falla
+    const check = await calendar.events.list({
+      calendarId,
+      timeMin: fechaInicio.toISOString(),
+      timeMax: fechaFin.toISOString(),
+      singleEvents: true
     });
 
-    if(busy.data.calendars[calendarId].busy.length>0){
-      return res.set('Content-Type','text/xml').send(`<Response><Message>Vaya, esa hora ya la tenemos reservada y me encantaría atenderte 🥲
-
-¿Te podría encajar a las ${hora+1}:00 el mismo día? Si no, dime otra hora que te venga mejor y te confirmo disponibilidad al momento.</Message></Response>`);
+    if(check.data.items && check.data.items.length>0){
+      return res.set('Content-Type','text/xml').send(`<Response><Message>Vaya, esa hora ya la tenemos reservada 🥲 ¿Te vendría bien a las ${hora+1}:00 el mismo día?</Message></Response>`);
     }
 
     await calendar.events.insert({
       calendarId,
       requestBody:{
         summary: `Cita - ${req.body.From}`,
-        description: `Cliente: ${req.body.From} - Mensaje: ${msg}`,
+        description: msg,
         start:{dateTime: fechaInicio.toISOString(), timeZone:'Europe/Madrid'},
         end:{dateTime: fechaFin.toISOString(), timeZone:'Europe/Madrid'}
       }
     });
 
     const bonito = fechaInicio.toLocaleString('es-ES',{weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit', timeZone:'Europe/Madrid'});
-
     return res.set('Content-Type','text/xml').send(`<Response><Message>¡Perfecto! Reserva confirmada ✅💈
-
-Te esperamos el *${bonito}* en Peluquería Carmen.
-
-Hemos reservado 1 hora para ti. Si necesitas cambiar o cancelar, solo avísanos por aquí.
-
-¡Muchas gracias por confiar en nosotros! ✨</Message></Response>`);
+Te esperamos el *${bonito}* en Peluquería Carmen. ¡Gracias! ✨</Message></Response>`);
 
   } catch(e){
-    console.error('ERROR:', e.message);
-    return res.set('Content-Type','text/xml').send(`<Response><Message>Disculpa, hemos tenido un pequeño problema técnico 🙏 ¿Me podrías repetir el día y la hora que te interesa? Ej: "Lunes a las 17:00"</Message></Response>`);
+    console.error('ERROR REAL FINAL:', e.message);
+    return res.set('Content-Type','text/xml').send(`<Response><Message>Disculpa, error (${e.message}) 🙏</Message></Response>`);
   }
 });
 
-app.get('/', (req,res)=>res.send('Maki Bot Live Profesional'));
+app.get('/', (req,res)=>res.send('Maki Bot Live'));
 app.listen(process.env.PORT||10000, ()=>console.log('Maki Bot Live'));
