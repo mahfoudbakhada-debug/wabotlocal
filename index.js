@@ -4,7 +4,7 @@ const app = express();
 app.use(express.urlencoded({ extended: false }));
 
 const CALENDAR_ID = 'd4e0154eadbb84f04f3a38d2cb52859e0496706c42b1eee72f06d6cd1eec524a@group.calendar.google.com';
-const memoria = new Map();
+const memoria = new Map(); // From -> { fecha, ts, estado, nombre? }
 
 function getAuth() {
   const b64 = (process.env.GOOGLE_CREDS_B64 || '').trim();
@@ -29,38 +29,69 @@ function parseFecha(texto, from) {
       }
     }
   }
-
-  // SI SOLO DICE HORA, USA EL DIA QUE RECORDAMOS
   if(!tieneDia && memoria.has(from)){
     let mem = memoria.get(from);
-    if(Date.now() - mem.ts < 300000){ // 5 min
+    if(mem.fecha && Date.now() - mem.ts < 300000){
       fecha.setDate(mem.fecha.getDate());
       fecha.setMonth(mem.fecha.getMonth());
       fecha.setFullYear(mem.fecha.getFullYear());
-      console.log('Memoria usada:', fecha);
     }
   }
-
   const m = texto.match(/(\d{1,2})[:h](\d{2})?/);
   if(!m) return null;
   fecha.setHours(parseInt(m[1]), m[2]?parseInt(m[2]):0, 0, 0);
-
   if(tieneDia){
-    memoria.set(from, { fecha: new Date(fecha), ts: Date.now() });
+    const prev = memoria.get(from) || {};
+    memoria.set(from, {...prev, fecha: new Date(fecha), ts: Date.now() });
   }
-
   return fecha;
 }
 
 app.post('/whatsapp', async (req,res)=>{
   try {
     const from = req.body.From || 'test';
-    const msg = req.body.Body || '';
-    const fechaInicio = parseFecha(msg, from);
+    const body = (req.body.Body || '').trim();
 
+    // 1. SI ESTAMOS ESPERANDO NOMBRE
+    if(memoria.has(from) && memoria.get(from).estado === 'esperando_nombre'){
+      const nombre = body.split(' ')[0]; // Solo primer nombre
+      if(nombre.length < 2){
+        return res.set('Content-Type','text/xml').send(`<Response><Message>Dime tu nombre porfa 😊 Ej: María</Message></Response>`);
+      }
+      const mem = memoria.get(from);
+      const fechaInicio = mem.fecha;
+      const fechaFin = new Date(fechaInicio.getTime()+60*60*1000);
+
+      const auth = await getAuth();
+      const calendar = google.calendar({version:'v3', auth});
+
+      await calendar.events.insert({
+        calendarId: CALENDAR_ID,
+        requestBody:{
+          summary: `💈 ${nombre} - Cita`,
+          description: `Cliente: ${nombre} (${from}) - Mensaje original: ${mem.msgOriginal}`,
+          start:{dateTime: fechaInicio.toISOString(), timeZone:'Europe/Madrid'},
+          end:{dateTime: fechaFin.toISOString(), timeZone:'Europe/Madrid'}
+        }
+      });
+
+      memoria.delete(from);
+      const bonito = fechaInicio.toLocaleString('es-ES',{weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit', timeZone:'Europe/Madrid'});
+      return res.set('Content-Type','text/xml').send(`<Response><Message>¡Perfecto ${nombre}! ✅💖
+
+💈 *Peluquería Carmen*
+📅 *${bonito}*
+📍 Calle Mayor, 12
+
+Te esperamos ✨</Message></Response>`);
+    }
+
+    // 2. SI ES FECHA
+    const fechaInicio = parseFecha(body, from);
     if(!fechaInicio) {
       return res.set('Content-Type','text/xml').send(`<Response><Message>¡Hola! Soy Maki de Peluquería Carmen 💈 Dime día y hora: "Lunes 17:00"</Message></Response>`);
     }
+
     const fechaFin = new Date(fechaInicio.getTime()+60*60*1000);
     const h = fechaInicio.getHours(); const d = fechaInicio.getDay();
     if(d===0 || h<10 || h>=20){
@@ -84,30 +115,19 @@ app.post('/whatsapp', async (req,res)=>{
 Pero tengo libre a las ${h+1}:00 o a las ${h+2}:00 el mismo día. ¿Te reservo? Solo di "A las ${h+1}:00"</Message></Response>`);
     }
 
-    await calendar.events.insert({
-      calendarId: CALENDAR_ID,
-      requestBody:{
-        summary: `💈 Cita - ${from}`,
-        description: msg,
-        start:{dateTime: fechaInicio.toISOString(), timeZone:'Europe/Madrid'},
-        end:{dateTime: fechaFin.toISOString(), timeZone:'Europe/Madrid'}
-      }
-    });
+    // 3. ESTA LIBRE -> PIDE NOMBRE, NO RESERVES AUN
+    const prev = memoria.get(from) || {};
+    memoria.set(from, {...prev, fecha: fechaInicio, ts: Date.now(), estado: 'esperando_nombre', msgOriginal: body });
 
-    memoria.delete(from);
-    const bonito = fechaInicio.toLocaleString('es-ES',{weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit', timeZone:'Europe/Madrid'});
-    return res.set('Content-Type','text/xml').send(`<Response><Message>¡Perfecto, reservado! ✅💖
+    const bonito = fechaInicio.toLocaleString('es-ES',{weekday:'long', hour:'2-digit', minute:'2-digit', timeZone:'Europe/Madrid'});
+    return res.set('Content-Type','text/xml').send(`<Response><Message>¡Genial! Tengo libre el ${bonito} ✅
 
-💈 *Peluquería Carmen*
-📅 *${bonito}*
-📍 Calle Mayor, 12
-
-Te esperamos ✨</Message></Response>`);
+¿A nombre de quién lo reservo?</Message></Response>`);
 
   } catch(e){
     console.error(e.message);
     return res.set('Content-Type','text/xml').send(`<Response><Message>Error: ${e.message}</Message></Response>`);
   }
 });
-app.get('/', (req,res)=>res.send('Maki Bot Live'));
+app.get('/', (req,res)=>res.send('Maki Bot Live V4 Profesional'));
 app.listen(process.env.PORT||10000, ()=>console.log('Live'));
