@@ -40,22 +40,22 @@ app.post('/whatsapp', async (req,res)=>{
     const msg = req.body.Body || '';
     const fechaInicio = parseFecha(msg);
     if(!fechaInicio) {
-      return res.set('Content-Type','text/xml').send(`<Response><Message>¡Hola! Soy Maki, asistente de Peluquería Carmen 💈✨
-Dime día y hora: Ej "Lunes a las 17:00" o "Mañana a las 11h". Horario L-S 10:00-20:00.</Message></Response>`);
+      return res.set('Content-Type','text/xml').send(`<Response><Message>¡Hola! Soy Maki, asistente de Peluquería Carmen 💈✨ Dime día y hora: Ej "Lunes a las 17:00" o "Mañana a las 11h".</Message></Response>`);
     }
     const fechaFin = new Date(fechaInicio.getTime()+60*60*1000);
     const hora = fechaInicio.getHours();
     const dia = fechaInicio.getDay();
     if(dia===0 || hora<10 || hora>=20){
-      return res.set('Content-Type','text/xml').send(`<Response><Message>Gracias por tu mensaje 😊 En ese horario estamos cerrados. Horario Lunes a Sábado 10:00-20:00. ¿Te va bien a las 11:00 o 17:00?</Message></Response>`);
+      return res.set('Content-Type','text/xml').send(`<Response><Message>Estamos cerrados 😊 L-S 10:00-20:00. ¿Te va bien 11:00 o 17:00?</Message></Response>`);
     }
 
     const auth = await getAuth();
     const calendar = google.calendar({version:'v3', auth});
-    const calendarId = (process.env.GOOGLE_CALENDAR_ID || '').trim();
+
+    // ID YA PUESTO A MANO, NO FALLA
+    const calendarId = 'mahfoudbakhada@gmail.com';
     console.log('Usando calendarId:', calendarId);
 
-    // NUEVO METODO que no falla
     const check = await calendar.events.list({
       calendarId,
       timeMin: fechaInicio.toISOString(),
@@ -64,7 +64,7 @@ Dime día y hora: Ej "Lunes a las 17:00" o "Mañana a las 11h". Horario L-S 10:0
     });
 
     if(check.data.items && check.data.items.length>0){
-      return res.set('Content-Type','text/xml').send(`<Response><Message>Vaya, esa hora ya la tenemos reservada 🥲 ¿Te vendría bien a las ${hora+1}:00 el mismo día?</Message></Response>`);
+      return res.set('Content-Type','text/xml').send(`<Response><Message>Esa hora está ocupada 🥲 ¿Te va bien a las ${hora+1}:00?</Message></Response>`);
     }
 
     await calendar.events.insert({
@@ -77,13 +77,12 @@ Dime día y hora: Ej "Lunes a las 17:00" o "Mañana a las 11h". Horario L-S 10:0
       }
     });
 
-    const bonito = fechaInicio.toLocaleString('es-ES',{weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit', timeZone:'Europe/Madrid'});
-    return res.set('Content-Type','text/xml').send(`<Response><Message>¡Perfecto! Reserva confirmada ✅💈
-Te esperamos el *${bonito}* en Peluquería Carmen. ¡Gracias! ✨</Message></Response>`);
+    const bonito = fechaInicio.toLocaleString('es-ES',{weekday:'long', day:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Europe/Madrid'});
+    return res.set('Content-Type','text/xml').send(`<Response><Message>¡Perfecto! Reserva confirmada ✅💈 Te esperamos el ${bonito} en Peluquería Carmen. ✨</Message></Response>`);
 
   } catch(e){
-    console.error('ERROR REAL FINAL:', e.message);
-    return res.set('Content-Type','text/xml').send(`<Response><Message>Disculpa, error (${e.message}) 🙏</Message></Response>`);
+    console.error('ERROR:', e.message);
+    return res.set('Content-Type','text/xml').send(`<Response><Message>Error: ${e.message}</Message></Response>`);
   }
 });
 
