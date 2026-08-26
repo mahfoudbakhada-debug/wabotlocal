@@ -11,7 +11,7 @@ const WHATSAPP_NUMBER = process.env.WHATSAPP_NUMBER || "14155238886";
 const BUSINESS_ADDRESS = process.env.BUSINESS_ADDRESS || "C/ Mayor 12, 28001 Madrid";
 const EMOJI = process.env.EMOJI || "✨";
 
-// --- GOOGLE ---
+// --- GOOGLE CON FIX HORARIO ---
 function getGoogleCreds() {
   if (process.env.GOOGLE_CREDENTIALS) return JSON.parse(process.env.GOOGLE_CREDENTIALS);
   if (process.env.GOOGLE_CREDS_B64) return JSON.parse(Buffer.from(process.env.GOOGLE_CREDS_B64, 'base64').toString('utf-8'));
@@ -41,6 +41,12 @@ async function getHuecosLibres(fecha){
     const ocupadas=(res.data.items||[]).map(e=>new Date(e.start.dateTime||e.start.date).getHours());
     let libres=[]; for(let h=H_INI;h<=H_FIN;h++) if(!ocupadas.includes(h)) libres.push(h+':00'); return libres.length?libres:['10:00','12:00','17:00','18:00'];
   }catch(e){ return ['10:00','11:00','12:00','17:00','18:00']; }
+}
+
+// FIX MADRID: convierte 14:00 local a 14:00 Madrid real
+function toLocalMadrid(d){
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
 }
 
 app.get('/health',(req,res)=>res.send('OK'));
@@ -128,7 +134,7 @@ h1.lila{background:linear-gradient(90deg,#8B5CF6,#D4AF37);-webkit-background-cli
 `);
 });
 
-// --- BOT ARREGLADO - NO ES SUBNORMAL ---
+// --- BOT CON HORARIO MADRID CORREGIDO ---
 app.post('/whatsapp', async (req,res)=>{
   const from=req.body.From; const raw=(req.body.Body||"").trim(); const body=raw.toLowerCase();
   if(!sesiones[from]) sesiones[from]={estado:'inicio'};
@@ -189,12 +195,12 @@ app.post('/whatsapp', async (req,res)=>{
             requestBody:{
               summary:`${ses.nombre} - ${BUSINESS_NAME}`,
               description:`Cliente: ${ses.nombre}\nTel: ${from}`,
-              start:{dateTime:ses.fecha.toISOString(), timeZone:'Europe/Madrid'},
-              end:{dateTime:new Date(ses.fecha.getTime()+45*60000).toISOString(), timeZone:'Europe/Madrid'},
+              start:{dateTime:toLocalMadrid(ses.fecha), timeZone:'Europe/Madrid'},
+              end:{dateTime:toLocalMadrid(new Date(ses.fecha.getTime()+45*60000)), timeZone:'Europe/Madrid'},
               location: BUSINESS_ADDRESS
             }
           });
-        }catch(e){console.log(e.message)}
+        }catch(e){console.log('CAL ERROR:', e.message)}
         const diaTxt=ses.fecha.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
         reply=`Reservado ${EMOJI}\n\n${BUSINESS_NAME}\n📅 ${diaTxt}\n👤 ${ses.nombre}\n📍 ${BUSINESS_ADDRESS}\n\nTe espero. Si necesitas cambiarla, escríbeme por aquí.\n\nGracias por confiar en ${BUSINESS_NAME}.`;
         delete sesiones[from];
@@ -206,4 +212,4 @@ app.post('/whatsapp', async (req,res)=>{
   res.send(`<Response><Message>${reply}</Message></Response>`);
 });
 
-app.listen(PORT,()=>console.log('LIVE V5 LILA ORO '+BUSINESS_NAME));
+app.listen(PORT,()=>console.log('LIVE V5 FIX MADRID '+BUSINESS_NAME));
