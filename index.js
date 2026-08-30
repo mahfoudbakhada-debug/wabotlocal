@@ -37,10 +37,8 @@ function parseFechaHora(texto){
     if(texto.includes('hoy')) tieneDia=true;
   }
   let hora=null;
-
-  // FIX PRO: entiende "a la una", "a las dos", etc.
-  if(texto.includes('a la una') || texto.includes('a las una') || /\buna\b/.test(texto) && texto.includes('a la')) hora=13;
-  else if(texto.includes('a las dos') || /\bdos\b/.test(texto) && texto.includes('a las')) hora=14;
+  if(texto.includes('a la una') || texto.includes('a las una')) hora=13;
+  else if(texto.includes('a las dos') || texto.includes('a las 2')) hora=14;
   else if(texto.includes('a las tres') || texto.includes('a las 3')) hora=15;
   else if(texto.includes('a las cuatro') || texto.includes('a las 4')) hora=16;
   else if(texto.includes('a las cinco') || texto.includes('a las 5')) hora=17;
@@ -55,7 +53,7 @@ function parseFechaHora(texto){
       if(m){ hora=parseInt(m[1]); if(hora>=1 && hora<=7) hora+=12; if(hora===8) hora=20; }
     }
   }
-  if(hora!==null && hora>=H_INI && hora<=H_FIN){ fecha.setHours(hora,0,0,0); } else if(hora!==null && (hora<H_INI || hora>H_FIN)){ hora=null; }
+  if(hora!==null && hora>=H_INI && hora<=H_FIN){ fecha.setHours(hora,0,0,0); } else if(hora!==null){ hora=null; }
   return {fecha,hora,tieneDia};
 }
 function toLocalMadrid(d){ const pad=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`; }
@@ -76,6 +74,8 @@ app.post('/whatsapp', (req,res)=>{
   const {fecha,hora,tieneDia}=parseFechaHora(raw);
   const tieneHora=hora!==null;
   const huecos=['10:00','11:00','12:00','13:00','14:00','17:00','18:00','19:00','20:00'];
+
+  const esTonteria = /^(jaja|jeje|jajaja|xd|ok|vale|que|q|hola\?|jijiji|bueno)$/i.test(body) || body.length < 3;
 
   if(ses.estado==='pidiendo_nombre'){
     if(raw.split(' ').length<2){
@@ -125,8 +125,17 @@ app.post('/whatsapp', (req,res)=>{
     const diaCap2=diaCap.charAt(0).toUpperCase()+diaCap.slice(1);
     reply=`Perfecto ${EMOJI}\n\nTengo disponible el ${diaCap2} a las ${hora}:00.\n\n¿A nombre de quién confirmo la reserva?`;
   }else{
-    // Si está pidiendo hora y dice tontería, no resetea
-    if(ses.estado==='pidiendo_hora' && ses.fecha){
+    if(esTonteria){
+      if(ses.estado==='pidiendo_hora' && ses.fecha){
+        const diaTxt=ses.fecha.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+        const diaCap=diaTxt.charAt(0).toUpperCase()+diaTxt.slice(1);
+        reply=`Jajaja ${EMOJI} dime, ¿qué hora te viene bien para el ${diaCap}?\n\nTengo:\n${formatHuecosPro(huecos)}`;
+      } else if(ses.estado==='pidiendo_nombre'){
+        reply=`Dime tu nombre completo y te lo cierro ya ${EMOJI}\n\nEjemplo: Ana García`;
+      } else {
+        reply=`Dime ${EMOJI} ¿para qué día quieres la cita en ${BUSINESS_NAME}?`;
+      }
+    } else if(ses.estado==='pidiendo_hora' && ses.fecha){
       const diaTxt=ses.fecha.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
       const diaCap=diaTxt.charAt(0).toUpperCase()+diaTxt.slice(1);
       reply=`Dime qué hora te viene bien para el ${diaCap} ${EMOJI}\n\nTengo libres:\n\n${formatHuecosPro(huecos)}`;
@@ -140,4 +149,4 @@ app.post('/whatsapp', (req,res)=>{
   return res.status(200).send(`<Response><Message>${reply}</Message></Response>`);
 });
 
-app.listen(PORT,()=>console.log('LIVE V5.2 MEMORIA PREMIUM'));
+app.listen(PORT,()=>console.log('LIVE V5.4 HUMANO PRO'));
