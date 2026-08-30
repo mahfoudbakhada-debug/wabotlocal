@@ -74,14 +74,16 @@ app.post('/whatsapp', (req,res)=>{
   const {fecha,hora,tieneDia}=parseFechaHora(raw);
   const tieneHora=hora!==null;
   const huecos=['10:00','11:00','12:00','13:00','14:00','17:00','18:00','19:00','20:00'];
-
   const esTonteria = /^(jaja|jeje|jajaja|xd|ok|vale|que|q|hola\?|jijiji|bueno)$/i.test(body) || body.length < 3;
 
   if(ses.estado==='pidiendo_nombre'){
-    if(raw.split(' ').length<2){
+    let textoNombre = raw.toLowerCase().replace(/nombre de|mi nombre es|me llamo|soy|nombre es|es de|nombre:/gi, '').trim();
+    let nombreLimpio = textoNombre || raw;
+    nombreLimpio = nombreLimpio.replace(/\s+/g,' ').trim();
+    if(nombreLimpio.split(' ').filter(w=>w.length>1).length < 2){
       reply=`¿Me indicas tu nombre completo por favor? ${EMOJI}\n\nNecesito nombre y apellido para confirmar.\n\nEjemplo: Ana García`;
     }else{
-      const nombre=raw.trim().split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
+      const nombre=nombreLimpio.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
       const diaTxt=ses.fecha?ses.fecha.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}):'';
       const diaCap=diaTxt.charAt(0).toUpperCase()+diaTxt.slice(1);
       try{
@@ -100,6 +102,15 @@ app.post('/whatsapp', (req,res)=>{
       }catch(e){}
       reply=`¡Reservado, ${nombre.split(' ')[0]}! ${EMOJI}\n\nTu cita en ${BUSINESS_NAME} está confirmada:\n\n📅 ${diaCap}\n👤 ${nombre}\n📍 ${BUSINESS_ADDRESS}\n\n¡Gracias por confiar en nosotros!`;
       delete sesiones[from];
+      sesiones[from] = { estado: 'acaba_de_reservar', fecha: null };
+    }
+  }else if(ses.estado === 'acaba_de_reservar'){
+    if(/gracias|graciad|jaja|jeje|genial|perfecto|ok|vale/i.test(body)){
+      reply=`¡De nada ${EMOJI} Nos vemos en ${BUSINESS_NAME}!`;
+      delete sesiones[from];
+    } else {
+      ses.estado='pidiendo_fecha';
+      reply=`¿Quieres reservar otra cita? ${EMOJI}\n\n¿Para qué día te gustaría?`;
     }
   }else if(ses.estado==='pidiendo_hora' && tieneHora && ses.fecha){
     ses.fecha.setHours(hora,0,0,0);
@@ -149,4 +160,4 @@ app.post('/whatsapp', (req,res)=>{
   return res.status(200).send(`<Response><Message>${reply}</Message></Response>`);
 });
 
-app.listen(PORT,()=>console.log('LIVE V5.4 HUMANO PRO'));
+app.listen(PORT,()=>console.log('LIVE V5.5 HUMANO PRO'));
