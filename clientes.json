@@ -1,0 +1,78 @@
+{
+  "carmen": {
+    "name": "Peluquería Carmen",
+    "address": "Carrer Major, 12, 08370 Calella, Barcelona",
+    "phone": "34 600111222",
+    "style": "peluqueria-pink",
+    "colors": {
+      "primary": "#ffffff",
+      "accent": "#ff6fa5"
+    },
+    "services": [
+      {
+        "name": "Corte Señora",
+        "price": 18
+      },
+      {
+        "name": "Tinte + Corte",
+        "price": 45
+      },
+      {
+        "name": "Mechas",
+        "price": 60
+      },
+      {
+        "name": "Peinado Evento",
+        "price": 30
+      }
+    ]
+  },
+  "vip-barber": {
+    "name": "Vip Barber",
+    "address": "Carrer del Mar, 31, 08370 Calella, Barcelona",
+    "phone": "34 631803276",
+    "style": "barber-black-gold",
+    "colors": {
+      "primary": "#000000",
+      "accent": "#D4AF37"
+    },
+    "services": [
+      {
+        "name": "Corte Degradado / Fade",
+        "price": 15
+      },
+      {
+        "name": "Corte + Barba",
+        "price": 20
+      },
+      {
+        "name": "Afeitado Clasico",
+        "price": 12
+      },
+      {
+        "name": "Corte Niño",
+        "price": 12
+      }
+    ]
+  },
+  "unas-maria": {
+    "name": "Uñas Maria",
+    "address": "Dirección pendiente",
+    "phone": "34 600000000",
+    "style": "peluqueria-pink",
+    "colors": {
+      "primary": "#ffffff",
+      "accent": "#ff6fa5"
+    },
+    "services": [
+      {
+        "name": "Servicio 1",
+        "price": 0
+      },
+      {
+        "name": "Servicio 2",
+        "price": 0
+      }
+    ]
+  }
+}
